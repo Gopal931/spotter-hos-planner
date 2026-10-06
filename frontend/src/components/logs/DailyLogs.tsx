@@ -7,9 +7,19 @@ interface DailyLogsProps {
   dailyLogs: DailyLogSheet[];
 }
 
+interface LogMetadataOverrides {
+  carrierName?: string;
+  truckTrailer?: string;
+  totalMilesToday?: string;
+  shippingDoc?: string;
+  fromLocation?: string;
+  toLocation?: string;
+}
+
 export const DailyLogs: React.FC<DailyLogsProps> = ({ dailyLogs }) => {
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
   const [isPrintingAll, setIsPrintingAll] = useState(false);
+  const [metaOverrides, setMetaOverrides] = useState<Record<number, LogMetadataOverrides>>({});
 
   useEffect(() => {
     const handleAfterPrint = () => {
@@ -26,6 +36,28 @@ export const DailyLogs: React.FC<DailyLogsProps> = ({ dailyLogs }) => {
   }
 
   const currentLog = dailyLogs[selectedDayIdx] || dailyLogs[0];
+
+  const getLogMeta = (log: DailyLogSheet) => {
+    const ov = metaOverrides[log.day_number] || {};
+    return {
+      carrierName: ov.carrierName !== undefined ? ov.carrierName : (log.carrier_name || 'Spotter Express Logistics'),
+      truckTrailer: ov.truckTrailer !== undefined ? ov.truckTrailer : `${log.truck_number} / ${log.trailer_number}`,
+      totalMilesToday: ov.totalMilesToday !== undefined ? ov.totalMilesToday : `${log.total_miles_today} mi`,
+      shippingDoc: ov.shippingDoc !== undefined ? ov.shippingDoc : (log.shipping_doc || 'BOL-104921'),
+      fromLocation: ov.fromLocation !== undefined ? ov.fromLocation : log.from_location,
+      toLocation: ov.toLocation !== undefined ? ov.toLocation : log.to_location,
+    };
+  };
+
+  const handleMetaChange = (dayNumber: number, field: keyof LogMetadataOverrides, val: string) => {
+    setMetaOverrides((prev) => ({
+      ...prev,
+      [dayNumber]: {
+        ...(prev[dayNumber] || {}),
+        [field]: val,
+      },
+    }));
+  };
 
   const handlePrintCurrent = () => {
     setIsPrintingAll(false);
@@ -71,6 +103,8 @@ export const DailyLogs: React.FC<DailyLogsProps> = ({ dailyLogs }) => {
   };
 
   const renderLogSheet = (log: DailyLogSheet) => {
+    const meta = getLogMeta(log);
+
     return (
       <div className="border border-slate-300 rounded-xl p-5 bg-white shadow-xs print:border-slate-400 print:shadow-none print:p-2 print:m-0">
         {/* Paper Log Header Info */}
@@ -94,34 +128,92 @@ export const DailyLogs: React.FC<DailyLogsProps> = ({ dailyLogs }) => {
             </div>
           </div>
 
-          {/* Form Metadata Grid */}
+          {/* Form Metadata Grid - Instantly Editable Inputs */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2.5 text-[11px] text-slate-700">
-            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80">
-              <span className="text-[9px] font-bold text-slate-400 block uppercase">Carrier Name</span>
-              <span className="font-semibold text-slate-900 truncate block">{log.carrier_name || 'Apex Logistics Fleet LLC'}</span>
+            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-100 transition-all">
+              <label htmlFor={`carrier-${log.day_number}`} className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider cursor-text">
+                Carrier Name
+              </label>
+              <input
+                id={`carrier-${log.day_number}`}
+                type="text"
+                value={meta.carrierName}
+                onChange={(e) => handleMetaChange(log.day_number, 'carrierName', e.target.value)}
+                placeholder="Spotter Express Logistics"
+                className="w-full bg-transparent font-semibold text-slate-900 text-xs px-0.5 py-0.5 outline-none border-none focus:ring-0 truncate"
+              />
             </div>
-            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80">
-              <span className="text-[9px] font-bold text-slate-400 block uppercase">Truck / Trailer</span>
-              <span className="font-semibold text-slate-900 truncate block">{log.truck_number} / {log.trailer_number}</span>
+
+            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-100 transition-all">
+              <label htmlFor={`truck-${log.day_number}`} className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider cursor-text">
+                Truck / Trailer
+              </label>
+              <input
+                id={`truck-${log.day_number}`}
+                type="text"
+                value={meta.truckTrailer}
+                onChange={(e) => handleMetaChange(log.day_number, 'truckTrailer', e.target.value)}
+                placeholder="TRK-5042 / TRL-9810"
+                className="w-full bg-transparent font-semibold text-slate-900 text-xs px-0.5 py-0.5 outline-none border-none focus:ring-0 truncate"
+              />
             </div>
-            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80">
-              <span className="text-[9px] font-bold text-slate-400 block uppercase">Total Miles Today</span>
-              <span className="font-bold text-slate-900 block">{log.total_miles_today} mi</span>
+
+            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-100 transition-all">
+              <label htmlFor={`miles-${log.day_number}`} className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider cursor-text">
+                Total Miles Today
+              </label>
+              <input
+                id={`miles-${log.day_number}`}
+                type="text"
+                value={meta.totalMilesToday}
+                onChange={(e) => handleMetaChange(log.day_number, 'totalMilesToday', e.target.value)}
+                placeholder="524.1 mi"
+                className="w-full bg-transparent font-bold text-slate-900 text-xs px-0.5 py-0.5 outline-none border-none focus:ring-0 truncate"
+              />
             </div>
-            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80">
-              <span className="text-[9px] font-bold text-slate-400 block uppercase">Shipping Doc / B/L</span>
-              <span className="font-semibold text-slate-900 truncate block">{log.shipping_doc || 'BOL-984210'}</span>
+
+            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-100 transition-all">
+              <label htmlFor={`bol-${log.day_number}`} className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider cursor-text">
+                Shipping Doc / B/L
+              </label>
+              <input
+                id={`bol-${log.day_number}`}
+                type="text"
+                value={meta.shippingDoc}
+                onChange={(e) => handleMetaChange(log.day_number, 'shippingDoc', e.target.value)}
+                placeholder="BOL-104921"
+                className="w-full bg-transparent font-semibold text-slate-900 text-xs px-0.5 py-0.5 outline-none border-none focus:ring-0 truncate"
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 pt-2 text-[11px] text-slate-700">
-            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80">
-              <span className="text-[9px] font-bold text-slate-400 block uppercase">Origin (From)</span>
-              <span className="font-medium text-slate-800 truncate block">{log.from_location}</span>
+            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-100 transition-all">
+              <label htmlFor={`orig-${log.day_number}`} className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider cursor-text">
+                Origin (From)
+              </label>
+              <input
+                id={`orig-${log.day_number}`}
+                type="text"
+                value={meta.fromLocation}
+                onChange={(e) => handleMetaChange(log.day_number, 'fromLocation', e.target.value)}
+                placeholder="Origin location"
+                className="w-full bg-transparent font-medium text-slate-800 text-xs px-0.5 py-0.5 outline-none border-none focus:ring-0 truncate"
+              />
             </div>
-            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80">
-              <span className="text-[9px] font-bold text-slate-400 block uppercase">Destination (To)</span>
-              <span className="font-medium text-slate-800 truncate block">{log.to_location}</span>
+
+            <div className="bg-slate-50/80 p-1.5 rounded border border-slate-200/80 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-100 transition-all">
+              <label htmlFor={`dest-${log.day_number}`} className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider cursor-text">
+                Destination (To)
+              </label>
+              <input
+                id={`dest-${log.day_number}`}
+                type="text"
+                value={meta.toLocation}
+                onChange={(e) => handleMetaChange(log.day_number, 'toLocation', e.target.value)}
+                placeholder="Destination location"
+                className="w-full bg-transparent font-medium text-slate-800 text-xs px-0.5 py-0.5 outline-none border-none focus:ring-0 truncate"
+              />
             </div>
           </div>
         </div>
