@@ -237,14 +237,11 @@ export function App() {
 
       {/* Production Footer */}
       <footer className="border-t border-slate-200 bg-white py-6 mt-16 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="font-semibold text-slate-800">Spotter HOS Planner</span>
             <span>—</span>
             <span>Commercial Truck Route & Hours of Service Engine</span>
-          </div>
-          <div className="text-slate-400 text-[11px]">
-            Compliant with FMCSA 49 CFR Part 395
           </div>
         </div>
       </footer>
