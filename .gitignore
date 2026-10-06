@@ -1,30 +1,10 @@
-# Virtual Environments
-venv/
-.venv/
-env/
+# ==============================================================================
+# SPOTTER HOS TRIP PLANNER — CONSOLIDATED ROOT .GITIGNORE
+# ==============================================================================
 
-# Python cache & artifacts
-__pycache__/
-*.py[cod]
-*$py.class
-*.sqlite3
-db.sqlite3
-staticfiles/
-
-# Node & dependencies
-node_modules/
-dist/
-.vite/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Testing & Coverage
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Environment Variables & Secrets
+# ------------------------------------------------------------------------------
+# 1. Environment Variables & Secret Files (Keep .env.example templates)
+# ------------------------------------------------------------------------------
 .env
 .env.*
 .env*.local
@@ -33,11 +13,86 @@ htmlcov/
 **/.env*.local
 *.env
 *.env.*
+# Explicitly keep configuration examples visible in GitHub
 !.env.example
 !**/.env.example
 
-# IDE & OS files
+# ------------------------------------------------------------------------------
+# 2. Python & Backend Exclusions (Django, Virtualenvs, Cache, Database)
+# ------------------------------------------------------------------------------
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / optimized / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Django local database & static collections
+db.sqlite3
+*.sqlite3
+staticfiles/
+mediafiles/
+
+# Testing & code coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# ------------------------------------------------------------------------------
+# 3. Node.js & Frontend Exclusions (Vite, React, Dependencies, Builds)
+# ------------------------------------------------------------------------------
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# Production build outputs
+dist/
+dist-ssr/
+**/dist/
+.vite/
+
+# Node logs & debug traces
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+# Exception: keep frontend daily logs component directory
+!frontend/src/components/logs/
+
+# ------------------------------------------------------------------------------
+# 4. Operating System & IDE Files
+# ------------------------------------------------------------------------------
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
 Thumbs.db
-.vscode/
+ehthumbs.db
+Desktop.ini
+
+# IDEs & Editors
+.vscode/*
+!.vscode/extensions.json
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.bak
