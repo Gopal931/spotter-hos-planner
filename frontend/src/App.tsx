@@ -244,7 +244,7 @@ export function App() {
             <span>Commercial Truck Route & Hours of Service Engine</span>
           </div>
           <div className="text-slate-400 text-[11px]">
-            Compliant with FMCSA 49 CFR Part 395 • Spotter AI Assessment
+            Compliant with FMCSA 49 CFR Part 395
           </div>
         </div>
       </footer>
