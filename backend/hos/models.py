@@ -1,3 +1,4 @@
-from django.db import models
-
-# Create your models here.
+"""
+Models module for HOS application.
+Stateless HOS trip planning and ELD log generation do not require persistent database models.
+"""

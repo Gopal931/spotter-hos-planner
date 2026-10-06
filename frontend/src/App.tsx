@@ -13,13 +13,15 @@ import { planTrip } from './services/api';
 import type { TripPlanRequest, TripPlanResponse } from './types/trip';
 import { AlertCircle, X, Shield } from 'lucide-react';
 
+const DEFAULT_TRIP_PLAN_REQUEST: TripPlanRequest = {
+  current_location: 'New York, NY',
+  pickup_location: 'Philadelphia, PA',
+  dropoff_location: 'Chicago, IL',
+  cycle_used_hours: 30,
+};
+
 export function App() {
-  const [formData, setFormData] = useState<TripPlanRequest>({
-    current_location: 'New York, NY',
-    pickup_location: 'Philadelphia, PA',
-    dropoff_location: 'Chicago, IL',
-    cycle_used_hours: 30,
-  });
+  const [formData, setFormData] = useState<TripPlanRequest>(DEFAULT_TRIP_PLAN_REQUEST);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [tripData, setTripData] = useState<TripPlanResponse | null>(null);
@@ -74,7 +76,7 @@ export function App() {
 
   // Run initial plan on mount
   useEffect(() => {
-    executeTripPlan(formData);
+    executeTripPlan(DEFAULT_TRIP_PLAN_REQUEST);
   }, []);
 
   return (
