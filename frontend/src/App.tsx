@@ -90,7 +90,7 @@ export function App() {
       <main className="flex-1">
         <PageContainer activeView={activeView} onNavigate={handleNavigate}>
           {/* Trip Input Section */}
-          <div ref={plannerSectionRef}>
+          <div ref={plannerSectionRef} className="no-print">
             <TripForm
               formData={formData}
               onChange={handleInputChange}
@@ -110,7 +110,7 @@ export function App() {
 
           {/* Error Message Card */}
           {errorMessage && (
-            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start justify-between gap-3 shadow-xs">
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start justify-between gap-3 shadow-xs no-print">
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                 <div>
@@ -134,28 +134,32 @@ export function App() {
           )}
 
           {/* Loading Progress State */}
-          {isLoading && <LoadingState />}
+          {isLoading && (
+            <div className="no-print">
+              <LoadingState />
+            </div>
+          )}
 
           {/* Results Sections */}
           {!isLoading && tripData && (
             <div className="space-y-8">
               {/* Trip Summary (5 KPIs) */}
-              <section aria-label="Trip Summary">
+              <section aria-label="Trip Summary" className="no-print">
                 <TripSummary summary={tripData.summary} />
               </section>
 
               {/* Interactive Route Map */}
-              <section aria-label="Route Map">
+              <section aria-label="Route Map" className="no-print">
                 <RouteMap route={tripData.route} />
               </section>
 
               {/* HOS Compliance Status Checklist */}
-              <section aria-label="HOS Compliance">
+              <section aria-label="HOS Compliance" className="no-print">
                 <ComplianceCard compliance={tripData.compliance} />
               </section>
 
               {/* Trip Schedule Timeline */}
-              <section aria-label="Trip Schedule">
+              <section aria-label="Trip Schedule" className="no-print">
                 <TripTimeline schedule={tripData.schedule} />
               </section>
 
@@ -168,7 +172,9 @@ export function App() {
 
           {/* Empty State when no tripData and not loading */}
           {!isLoading && !tripData && !errorMessage && (
-            <EmptyState onCreateTrip={() => executeTripPlan(formData)} />
+            <div className="no-print">
+              <EmptyState onCreateTrip={() => executeTripPlan(formData)} />
+            </div>
           )}
         </PageContainer>
       </main>

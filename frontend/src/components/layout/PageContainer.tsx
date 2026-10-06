@@ -15,7 +15,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
       {/* Breadcrumb & Hero Header */}
-      <div>
+      <div className="no-print">
         <nav aria-label="Breadcrumb" className="flex items-center space-x-1.5 text-xs text-slate-500 mb-2">
           <button 
             type="button" 
