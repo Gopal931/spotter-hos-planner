@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Printer, CheckCircle, FileText } from 'lucide-react';
 import { ELDGraph } from './ELDGraph';
 import type { DailyLogSheet } from '../../types/trip';
@@ -9,7 +9,17 @@ interface DailyLogsProps {
 
 export const DailyLogs: React.FC<DailyLogsProps> = ({ dailyLogs }) => {
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
-  const [printScope, setPrintScope] = useState<'current' | 'all'>('current');
+  const [isPrintingAll, setIsPrintingAll] = useState(false);
+
+  useEffect(() => {
+    const handleAfterPrint = () => {
+      setIsPrintingAll(false);
+    };
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, []);
 
   if (!dailyLogs || dailyLogs.length === 0) {
     return null;
@@ -17,12 +27,18 @@ export const DailyLogs: React.FC<DailyLogsProps> = ({ dailyLogs }) => {
 
   const currentLog = dailyLogs[selectedDayIdx] || dailyLogs[0];
 
-  const handlePrint = (scope: 'current' | 'all' = 'current') => {
-    setPrintScope(scope);
-    // Allow state change to render before opening browser print dialog
+  const handlePrintCurrent = () => {
+    setIsPrintingAll(false);
     setTimeout(() => {
       window.print();
-    }, 80);
+    }, 60);
+  };
+
+  const handlePrintAll = () => {
+    setIsPrintingAll(true);
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   const getStatusPill = (status: string) => {
@@ -54,9 +70,9 @@ export const DailyLogs: React.FC<DailyLogsProps> = ({ dailyLogs }) => {
     }
   };
 
-  const renderLogSheet = (log: DailyLogSheet, isPrint: boolean = false) => {
+  const renderLogSheet = (log: DailyLogSheet) => {
     return (
-      <div className={`bg-white ${isPrint ? 'p-2' : 'border border-slate-300 rounded-xl p-5 shadow-xs'}`}>
+      <div className="border border-slate-300 rounded-xl p-5 bg-white shadow-xs print:border-slate-400 print:shadow-none print:p-2 print:m-0">
         {/* Paper Log Header Info */}
         <div className="pb-3 mb-3 border-b border-slate-200 text-xs">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 pb-2 border-b border-slate-100">
@@ -242,20 +258,20 @@ export const DailyLogs: React.FC<DailyLogsProps> = ({ dailyLogs }) => {
           {/* Print Current Sheet */}
           <button
             type="button"
-            onClick={() => handlePrint('current')}
-            className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold border border-blue-200 flex items-center gap-1.5 cursor-pointer transition shadow-2xs"
+            onClick={handlePrintCurrent}
+            className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 cursor-pointer transition"
             title={`Print or Save PDF for Day ${currentLog.day_number}`}
           >
-            <Printer className="w-3.5 h-3.5 text-blue-600" />
-            <span>Print Day {currentLog.day_number} (A4)</span>
+            <Printer className="w-3.5 h-3.5 text-white" />
+            <span>Print Log (Day {currentLog.day_number})</span>
           </button>
 
           {/* Print All Sheets (if multi-day) */}
           {dailyLogs.length > 1 && (
             <button
               type="button"
-              onClick={() => handlePrint('all')}
-              className="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 flex items-center gap-1.5 cursor-pointer transition"
+              onClick={handlePrintAll}
+              className="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-300 flex items-center gap-1.5 cursor-pointer transition"
               title={`Print all ${dailyLogs.length} daily log sheets`}
             >
               <FileText className="w-3.5 h-3.5 text-slate-500" />
@@ -291,16 +307,11 @@ export const DailyLogs: React.FC<DailyLogsProps> = ({ dailyLogs }) => {
         </div>
       </div>
 
-      {/* On-Screen Active Tab Sheet View (Hidden in Print) */}
-      <div className="print:hidden">
-        {renderLogSheet(currentLog, false)}
-      </div>
-
-      {/* Print-Only Official A4 Document View */}
-      <div className="hidden print:block">
-        {(printScope === 'all' ? dailyLogs : [currentLog]).map((log, idx) => (
-          <div key={log.day_number || idx} className="a4-log-page">
-            {renderLogSheet(log, true)}
+      {/* Daily Driver Log Sheets (Always directly rendered in DOM) */}
+      <div className="daily-logs-print-area">
+        {(isPrintingAll ? dailyLogs : [currentLog]).map((log, idx) => (
+          <div key={log.day_number || idx} className="a4-log-page mb-6 print:mb-0">
+            {renderLogSheet(log)}
           </div>
         ))}
       </div>
